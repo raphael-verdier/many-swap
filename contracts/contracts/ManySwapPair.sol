@@ -92,30 +92,28 @@ contract ManySwapPair is IERC20, ERC20  {
     }
 
     // this low-level function should be called from a contract which performs important safety checks
-    function mint(address to) external lock returns (uint256 liquidity) {
-        (uint112 _reserve0, uint112 _reserve1, ) = getReserves(); // gas savings
-        uint256 balance0 = IERC20(token0).balanceOf(address(this));
-        uint256 balance1 = IERC20(token1).balanceOf(address(this));
-        uint256 amount0 = balance0.sub(_reserve0);
-        uint256 amount1 = balance1.sub(_reserve1);
+    function mint(address to) external lock returns (uint256 liquidityToMint) {
+        (uint112 _lastReserve0, uint112 _lastReserve1, ) = getReserves(); // gas savings
+        uint256 currentBalance0 = IERC20(token0).balanceOf(address(this));
+        uint256 currentBalance1 = IERC20(token1).balanceOf(address(this));
+        uint256 addedAmount0 = currentBalance0.sub(_lastReserve0);
+        uint256 addedAmount1 = currentBalance1.sub(_lastReserve1);
 
-        // bool feeOn = _mintFee(_reserve0, _reserve1);
         uint256 _totalSupply = totalSupply(); // gas savings, must be defined here since totalSupply can update in _mintFee
         if (_totalSupply == 0) {
-            liquidity = AdvancedMath.sqrt(amount0.mul(amount1)).sub(MINIMUM_LIQUIDITY);
+            liquidityToMint = AdvancedMath.sqrt(addedAmount0.mul(addedAmount1)).sub(MINIMUM_LIQUIDITY);
             _mint(address(0), MINIMUM_LIQUIDITY); // permanently lock the first MINIMUM_LIQUIDITY tokens
         } else {
-            liquidity = Math.min(
-                amount0.mul(_totalSupply) / _reserve0,
-                amount1.mul(_totalSupply) / _reserve1
+            liquidityToMint = Math.min(
+                addedAmount0.mul(_totalSupply) / _lastReserve0,
+                addedAmount1.mul(_totalSupply) / _lastReserve1
             );
         }
-        require(liquidity > 0, "ManySwap: INSUFFICIENT_LIQUIDITY_MINTED");
-        _mint(to, liquidity);
+        require(liquidityToMint > 0, "ManySwap: INSUFFICIENT_LIQUIDITY_MINTED");
+        _mint(to, liquidityToMint);
 
-        _update(balance0, balance1, _reserve0, _reserve1);
-        // if (feeOn) kLast = uint256(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
-        emit Mint(msg.sender, amount0, amount1);
+        _update(currentBalance0, currentBalance1, _lastReserve0, _lastReserve1);
+        emit Mint(msg.sender, addedAmount0, addedAmount1);
     }
 
     // this low-level function should be called from a contract which performs important safety checks
@@ -127,7 +125,6 @@ contract ManySwapPair is IERC20, ERC20  {
         uint balance1 = IERC20(_token1).balanceOf(address(this));
         uint liquidity = balanceOf(address(this));
 
-        // bool feeOn = _mintFee(_reserve0, _reserve1);
         uint _totalSupply = totalSupply(); // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
@@ -139,7 +136,6 @@ contract ManySwapPair is IERC20, ERC20  {
         balance1 = IERC20(_token1).balanceOf(address(this));
 
         _update(balance0, balance1, _reserve0, _reserve1);
-        // if (feeOn) kLast = uint(reserve0).mul(reserve1); // reserve0 and reserve1 are up-to-date
         emit Burn(msg.sender, amount0, amount1, to);
     }
 
@@ -149,28 +145,27 @@ contract ManySwapPair is IERC20, ERC20  {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         require(amount0Out < _reserve0 && amount1Out < _reserve1, 'ManySwap: INSUFFICIENT_LIQUIDITY');
 
-        uint balance0;
-        uint balance1;
+        uint currentBalance0;
+        uint currentBalance1;
         { // scope for _token{0,1}, avoids stack too deep errors
         address _token0 = token0;
         address _token1 = token1;
         require(to != _token0 && to != _token1, 'ManySwap: INVALID_TO');
         if (amount0Out > 0) _safeTransfer(_token0, to, amount0Out); // optimistically transfer tokens
         if (amount1Out > 0) _safeTransfer(_token1, to, amount1Out); // optimistically transfer tokens
-        // if (data.length > 0) IUniswapV2Callee(to).uniswapV2Call(msg.sender, amount0Out, amount1Out, data);
-        balance0 = IERC20(_token0).balanceOf(address(this));
-        balance1 = IERC20(_token1).balanceOf(address(this));
+        currentBalance0 = IERC20(_token0).balanceOf(address(this));
+        currentBalance1 = IERC20(_token1).balanceOf(address(this));
         }
-        uint amount0In = balance0 > _reserve0 - amount0Out ? balance0 - (_reserve0 - amount0Out) : 0;
-        uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
+        uint amount0In = currentBalance0 > _reserve0 - amount0Out ? currentBalance0 - (_reserve0 - amount0Out) : 0;
+        uint amount1In = currentBalance1 > _reserve1 - amount1Out ? currentBalance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'ManySwap: INSUFFICIENT_INPUT_AMOUNT');
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
+        uint balance0Adjusted = currentBalance0.mul(1000).sub(amount0In.mul(3));
+        uint balance1Adjusted = currentBalance1.mul(1000).sub(amount1In.mul(3));
         require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(10**2), 'ManySwap: K');
         }
 
-        _update(balance0, balance1, _reserve0, _reserve1);
+        _update(currentBalance0, currentBalance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
 }

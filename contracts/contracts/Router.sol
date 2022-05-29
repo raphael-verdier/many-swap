@@ -37,6 +37,14 @@ contract Router {
     liquidity = ManySwapPair(pair).mint(msg.sender);
   }
 
+  function removeLiquidity(
+      address pair,
+      uint liquidity
+  ) public returns (uint amount0, uint amount1) {
+      ManySwapPair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
+      (amount0, amount1) = ManySwapPair(pair).burn(msg.sender);
+  }
+
   function getAmountOut(
     address tokenIn,
     address pair,
@@ -55,7 +63,7 @@ contract Router {
       reserveIn > 0 && reserveOut > 0,
       'ManySwap: INSUFFICIENT_LIQUIDITY'
     );
-    uint256 amountInWithFee = amountIn.mul(1000);
+    uint256 amountInWithFee = amountIn.mul(997);
     uint256 numerator = amountInWithFee.mul(reserveOut);
     uint256 denominator = reserveIn.mul(1000).add(amountInWithFee);
     amountOut = numerator / denominator;

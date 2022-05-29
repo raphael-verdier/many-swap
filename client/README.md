@@ -25,5 +25,7 @@ yarn test:unit
 yarn lint
 ```
 
+## Technical approach and best practices
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).

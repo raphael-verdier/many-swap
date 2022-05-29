@@ -152,6 +152,7 @@ export default {
           this.token1Amount,
           this.currentTokenNumberSelling
         )
+        this.loadPrices()
         this.resetAmounts()
         this.$toast.success('Swap confirmed')
       } catch (error) {

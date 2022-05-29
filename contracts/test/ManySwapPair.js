@@ -101,7 +101,9 @@ contract('ManySwapPair', accounts => {
       await runFirstMint()
       expect(
         await manySwapPairContract.balanceOf(firstMinterAddress)
-      ).to.be.bignumber.equal(INITIAL_TOKEN_BALANCE_VALUE - MINIMUM_LIQUIDITY)
+      ).to.be.bignumber.equal(
+        INITIAL_TOKEN_BALANCE_VALUE.sub(MINIMUM_LIQUIDITY)
+      )
     })
 
     it('Given the first mint was already ran and some new funds are added, when miniting, then the new pooler has received liquidity', async () => {
@@ -183,17 +185,19 @@ contract('ManySwapPair', accounts => {
         testTokenInitalBalances[0]
       )
 
+      await time.advanceBlock()
+
       const tokenPrices = await getTokenPrices()
       expect(tokenPrices[0]).to.be.bignumber.equal(
-        new BN(804806013072898282422226931029114880)
+        new BN('804806013072898282422226931029114880')
       )
       expect(tokenPrices[1]).to.be.bignumber.equal(
-        new BN(1614804323004331392472984358387449856)
+        new BN('1614804323004331392472984358387449856')
       )
     })
   })
 
-  describe.only('Swap', () => {
+  describe('Swap', () => {
     it('Given token are sent preemptively, when swaping tokens, then send the correct amount to the caller', async () => {
       await runFirstMint()
       await addFundsAndMint()

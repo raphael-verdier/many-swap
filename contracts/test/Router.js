@@ -163,6 +163,59 @@ contract('Router', accounts => {
     })
   })
 
+  describe('Remove liquidity', () => {
+    const setupForLiquidityRemoval = async userAddress => {
+      const token0Amount = new BN(10 ** 3)
+      const token1Amount = new BN(10 ** 3 * 2)
+      await deployTestTokens()
+      await RouterContract.createPair(
+        testTokenContracts[0].address,
+        testTokenContracts[1].address
+      )
+      await allowTransfer(testTokenContracts[0], token0Amount, userAddress)
+      await allowTransfer(testTokenContracts[1], token1Amount, userAddress)
+      await RouterContract.addLiquidity(
+        testTokenContracts[0].address,
+        testTokenContracts[1].address,
+        token0Amount,
+        token1Amount,
+        {
+          from: firstUserAddress
+        }
+      )
+      await time.advanceBlock()
+    }
+
+    it('Given some account with liquidity, when withdrawing it, then properly send the tolens', async () => {
+      await setupForLiquidityRemoval(firstUserAddress)
+      const pairAddress = await RouterContract.getPair(
+        testTokenContracts[0].address,
+        testTokenContracts[1].address
+      )
+      const manySwapPairContract = await ManySwapPair.at(pairAddress)
+
+      const liquidityAmount = 10
+      await allowTransfer(
+        manySwapPairContract,
+        liquidityAmount,
+        firstUserAddress
+      )
+      await RouterContract.removeLiquidity(pairAddress, liquidityAmount, {
+        from: firstUserAddress
+      })
+      await time.advanceBlock()
+      const token0Balance = await testTokenContracts[0].balanceOf(
+        firstUserAddress
+      )
+      const token1Balance = await testTokenContracts[1].balanceOf(
+        firstUserAddress
+      )
+
+      expect(token0Balance).to.be.bignumber.equal(new BN(9007))
+      expect(token1Balance).to.be.bignumber.equal(new BN(8014))
+    })
+  })
+
   describe('Swap', () => {
     const setupForSwap = async (tokenAmount, tokenIndex, userAddress) => {
       await deployTestTokens()
@@ -188,7 +241,7 @@ contract('Router', accounts => {
       )
     }
 
-    it.only('Given some allowed swap transfer, when processing the swap, then properly wire amount of tokens', async () => {
+    it('Given some allowed swap transfer, when processing the swap, then properly wire amount of tokens', async () => {
       const token0Amount = new BN(10 ** 3)
       const token1Amount = new BN(0)
       await setupForSwap(token0Amount, 0, firstUserAddress)
@@ -208,7 +261,7 @@ contract('Router', accounts => {
         firstUserAddress
       )
 
-      expect(token1NewBalance).to.be.bignumber.equal(new BN(10999))
+      expect(token1NewBalance).to.be.bignumber.equal(new BN(10996))
     })
   })
 })

@@ -1,12 +1,10 @@
 import * as accountBalances from './accountBalances'
-import * as metamask from './metamask'
 import {
   ROUTER_ADDRESS,
   getPairContract,
   getRouterContract,
   getTokenContract
 } from './contracts'
-import { utils } from 'ethers'
 
 let pairs
 
@@ -89,7 +87,7 @@ export const getPairDetailsByAddress = addressToFind => {
 }
 
 const _allowTransfer = (tokenContract, amount) => {
-  return tokenContract.increaseAllowance(ROUTER_ADDRESS, amount * 2)
+  return tokenContract.increaseAllowance(ROUTER_ADDRESS, amount *2)
 }
 
 export const addLiquidity = async (
@@ -98,8 +96,14 @@ export const addLiquidity = async (
   token0Amount,
   token1Amount
 ) => {
-  await _allowTransfer(getTokenContract(token0Address, true), token0Amount)
-  await _allowTransfer(getTokenContract(token1Address, true), token1Amount)
+  const allowanceTransactions = [
+    await _allowTransfer(getTokenContract(token0Address, true), token0Amount),
+    await _allowTransfer(getTokenContract(token1Address, true), token1Amount)
+  ]
+  await Promise.all([
+    allowanceTransactions[0].wait(),
+    allowanceTransactions[1].wait()
+  ])
   const routerContract = getRouterContract(true)
   const liquidityTransaction = await routerContract.addLiquidity(
     token0Address,
@@ -143,4 +147,16 @@ export const swapTokens = async (
     token1Amount
   )
   await swapTransaction.wait()
+}
+
+export const withdrawLiquidity = async (pairAddress, withdrawnAmount) => {
+  withdrawnAmount = parseInt(withdrawnAmount, 10)
+  await _allowTransfer(getTokenContract(pairAddress, true), withdrawnAmount)
+  const routerContract = getRouterContract(true)
+  const liquidityTransaction = await routerContract.removeLiquidity(
+    pairAddress,
+    withdrawnAmount
+  )
+  await liquidityTransaction.wait()
+  accountBalances.refreshAccountBalances()
 }
