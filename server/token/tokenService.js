@@ -1,9 +1,9 @@
 const TOKEN_LIST = [
   {
-    id: 'eth',
-    label: 'Ethereum',
-    icon: 'mdi-ethereum',
-    symbol: 'ETH'
+    id: 'wbitcoin',
+    label: 'Wrapped Bitcoin',
+    icon: 'mdi-bitcoin',
+    symbol: 'WBTC'
   },
   {
     id: 'link',

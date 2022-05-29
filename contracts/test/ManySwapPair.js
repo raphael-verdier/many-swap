@@ -1,16 +1,16 @@
-const chai = require("chai")
+const chai = require('chai')
 const { expect } = chai
 
-const ManySwapPair = artifacts.require("ManySwapPair")
-const ERC20Mock = artifacts.require("ERC20Mock")
+const ERC20Mock = artifacts.require('ERC20Mock')
+const ManySwapPair = artifacts.require('ManySwapPair')
 const {
   BN, // Big Number support
   constants, // Common constants, like the zero address and largest integers
   time
-} = require("@openzeppelin/test-helpers")
-chai.use(require("chai-bn")(BN))
+} = require('@openzeppelin/test-helpers')
+chai.use(require('chai-bn')(BN))
 
-contract("ManySwapPair", (accounts) => {
+contract('ManySwapPair', accounts => {
   const INITIAL_TOKEN_BALANCE_VALUE = new BN(10 ** 5)
   const MINIMUM_LIQUIDITY = new BN(10 ** 3)
 
@@ -26,14 +26,14 @@ contract("ManySwapPair", (accounts) => {
 
   const deployTestTokens = async () => {
     testTokenContracts[0] = await ERC20Mock.new(
-      "Test Token 0",
-      "TST0",
+      'Test Token 0',
+      'TST0',
       placeHolderAddress,
       0
     )
     testTokenContracts[1] = await ERC20Mock.new(
-      "Test Token 1",
-      "TST1",
+      'Test Token 1',
+      'TST1',
       placeHolderAddress,
       0
     )
@@ -69,8 +69,8 @@ contract("ManySwapPair", (accounts) => {
     )
   })
 
-  describe("Setup checks", () => {
-    it("Given a ManySwap contract and some test tokens, when deploying it, then token accounts addresses are well set", async () => {
+  describe('Setup checks', () => {
+    it('Given a ManySwap contract and some test tokens, when deploying it, then token accounts addresses are well set', async () => {
       expect(await manySwapPairContract.token0()).to.equal(
         testTokenContracts[0].address
       )
@@ -79,7 +79,7 @@ contract("ManySwapPair", (accounts) => {
       )
     })
 
-    it("Given some test tokens, when deploying them, then the swap contract funds are well funded", async () => {
+    it('Given some test tokens, when deploying them, then the swap contract funds are well funded', async () => {
       expect(
         await testTokenContracts[0].balanceOf(manySwapPairContract.address)
       ).to.be.bignumber.equal(testTokenInitalBalances[0])
@@ -89,22 +89,22 @@ contract("ManySwapPair", (accounts) => {
     })
   })
 
-  describe("Minting", () => {
-    it("Given some test tokens initial balance, when doing the first mint, then a minimum liquidity amount is locked", async () => {
+  describe('Minting', () => {
+    it('Given some test tokens initial balance, when doing the first mint, then a minimum liquidity amount is locked', async () => {
       await runFirstMint()
       expect(
         await manySwapPairContract.balanceOf(constants.ZERO_ADDRESS)
       ).to.be.bignumber.equal(MINIMUM_LIQUIDITY)
     })
 
-    it("Given some test tokens initial balance, when doing the first mint, then the minter has the corresponding liquidity without the minium locked", async () => {
+    it('Given some test tokens initial balance, when doing the first mint, then the minter has the corresponding liquidity without the minium locked', async () => {
       await runFirstMint()
       expect(
         await manySwapPairContract.balanceOf(firstMinterAddress)
       ).to.be.bignumber.equal(INITIAL_TOKEN_BALANCE_VALUE - MINIMUM_LIQUIDITY)
     })
 
-    it("Given the first mint was already ran and some new funds are added, when miniting, then the new pooler has received liquidity", async () => {
+    it('Given the first mint was already ran and some new funds are added, when miniting, then the new pooler has received liquidity', async () => {
       await runFirstMint()
       await addToTestTokens(
         testTokenInitalBalances[0],
@@ -116,7 +116,7 @@ contract("ManySwapPair", (accounts) => {
       ).to.be.bignumber.equal(new BN(INITIAL_TOKEN_BALANCE_VALUE))
     })
 
-    it("Given the first mint was already ran and some new funds are added, when the funds provided are different, then the new pooler has the appropriate liquidity", async () => {
+    it('Given the first mint was already ran and some new funds are added, when the funds provided are different, then the new pooler has the appropriate liquidity', async () => {
       await runFirstMint()
       await addToTestTokens(
         testTokenInitalBalances[0] * 2,
@@ -129,8 +129,8 @@ contract("ManySwapPair", (accounts) => {
     })
   })
 
-  describe("Burning", () => {
-    it("Given an account transfered liquidity, when burning liquidity, then proprotionate amounts of tokens are sent to the account", async () => {
+  describe('Burning', () => {
+    it('Given an account transfered liquidity, when burning liquidity, then proprotionate amounts of tokens are sent to the account', async () => {
       await runFirstMint()
       await manySwapPairContract.transfer(
         manySwapPairContract.address,
@@ -150,7 +150,7 @@ contract("ManySwapPair", (accounts) => {
     })
   })
 
-  describe("Price oracle", () => {
+  describe('Price oracle', () => {
     const getTokenPrices = async () => {
       return Promise.all([
         manySwapPairContract.price0CumulativeLast(),
@@ -158,7 +158,7 @@ contract("ManySwapPair", (accounts) => {
       ])
     }
 
-    it("Given some liquidity is minted from funds, when both tokens are provided with the same amount, then they are worth the same", async () => {
+    it('Given some liquidity is minted from funds, when both tokens are provided with the same amount, then they are worth the same', async () => {
       await runFirstMint()
       await time.increase(1)
       await addToTestTokens(
@@ -168,11 +168,10 @@ contract("ManySwapPair", (accounts) => {
       await addFundsAndMint()
 
       const tokenPrices = await getTokenPrices()
-      console.log(tokenPrices)
       expect(tokenPrices[0]).to.be.bignumber.equal(tokenPrices[1])
     })
 
-    it("Given some liquidity is minted from funds, when tokens are provided with different amount, then their price adjust proportionally", async () => {
+    it('Given some liquidity is minted from funds, when tokens are provided with different amount, then their price adjust proportionally', async () => {
       await runFirstMint()
 
       await addFundsAndMint(
@@ -185,7 +184,6 @@ contract("ManySwapPair", (accounts) => {
       )
 
       const tokenPrices = await getTokenPrices()
-      console.log(tokenPrices)
       expect(tokenPrices[0]).to.be.bignumber.equal(
         new BN(804806013072898282422226931029114880)
       )
@@ -195,20 +193,18 @@ contract("ManySwapPair", (accounts) => {
     })
   })
 
-  describe.only("Swap", () => {
-    it("Given token are sent preemptively, when swaping tokens, then send the correct amount to the caller", async () => {
+  describe.only('Swap', () => {
+    it('Given token are sent preemptively, when swaping tokens, then send the correct amount to the caller', async () => {
       await runFirstMint()
       await addFundsAndMint()
       await addFundsAndMint()
-      
+
       await addToTestTokens(0, 1000)
       await manySwapPairContract.swap(
         new BN(100),
         new BN(0),
         firstMinterAddress
       )
-
-
 
       expect(
         await testTokenContracts[0].balanceOf(firstMinterAddress)

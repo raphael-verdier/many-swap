@@ -58,6 +58,7 @@ contract ManySwapPair is IERC20, ERC20  {
     event Mint(address indexed sender, uint amount0, uint amount1);
     event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
     event Sync(uint112 reserve0, uint112 reserve1);
+    event Price(uint price0, uint price1);
     event Swap(
         address indexed sender,
         uint amount0In,
@@ -87,6 +88,7 @@ contract ManySwapPair is IERC20, ERC20  {
         reserve1 = uint112(balance1);
         blockTimestampLast = blockTimestamp;
         emit Sync(reserve0, reserve1);
+        emit Price(price0CumulativeLast, price1CumulativeLast);
     }
 
     // this low-level function should be called from a contract which performs important safety checks
@@ -165,7 +167,7 @@ contract ManySwapPair is IERC20, ERC20  {
         { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
         uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(3));
         uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(3));
-        require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'ManySwap: K');
+        require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(10**2), 'ManySwap: K');
         }
 
         _update(balance0, balance1, _reserve0, _reserve1);

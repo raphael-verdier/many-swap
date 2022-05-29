@@ -1,6 +1,27 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify/lib'
+import Vuetify, { VBtn, VIcon, VSnackbar } from 'vuetify/lib'
+import VuetifyToast from 'vuetify-toast-snackbar'
+import colors from 'vuetify/es5/util/colors'
 
-Vue.use(Vuetify)
+Vue.use(Vuetify, {
+  components: {
+    VSnackbar,
+    VBtn,
+    VIcon
+  }
+})
 
-export default new Vuetify({})
+Vue.use(VuetifyToast)
+
+export default new Vuetify({
+  theme: {
+    themes: {
+      light: {
+        primary: '#24243e',
+        secondary: colors.grey.darken1,
+        accent: colors.shades.black,
+        error: colors.red.accent3
+      }
+    }
+  }
+})
