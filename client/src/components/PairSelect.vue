@@ -7,7 +7,7 @@
     outlined
   >
     <template v-slot:selection="{ item }">
-      <v-chip color="primary" small>{{ getPairLabel(item) }}</v-chip>
+      {{ getPairLabel(item) }}
     </template>
     <template v-slot:item="{ item, attrs, on }">
       <v-list-item v-on="on" v-bind="attrs">

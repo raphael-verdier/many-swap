@@ -6,8 +6,7 @@ module.exports = async function (deployer, network, accounts) {
     await deployer.deploy(Router)
     const router = await Router.deployed()
     const firstUserAccount = accounts[0]
-    const secondUserAccount = accounts[1]
-    const thirdUserAccount = accounts[2]
+    const secondUserAccount = accounts[4]
 
     const [bitcoinInstance, linkInstance, tetherInstance] = await Promise.all([
       await ERC20Mock.new('Wrapped Bitcoin', 'WBTC', firstUserAccount, 1000000),
@@ -15,9 +14,9 @@ module.exports = async function (deployer, network, accounts) {
       await ERC20Mock.new('Tether USD', 'USDT', firstUserAccount, 1000000)
     ])
 
-    await bitcoinInstance.mint(thirdUserAccount, 2000000)
-    await linkInstance.mint(thirdUserAccount, 2000000)
-    await tetherInstance.mint(thirdUserAccount, 2000000)
+    await bitcoinInstance.mint(secondUserAccount, 2000000)
+    await linkInstance.mint(secondUserAccount, 2000000)
+    await tetherInstance.mint(secondUserAccount, 2000000)
 
     await router.createPair(bitcoinInstance.address, linkInstance.address)
     await router.createPair(bitcoinInstance.address, tetherInstance.address)

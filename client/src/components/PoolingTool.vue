@@ -68,6 +68,7 @@
         min="0"
         type="number"
         v-model="token0Amount"
+        :disabled="isChangingLiquidity"
       >
       </v-text-field>
       <v-text-field
@@ -75,6 +76,7 @@
         min="0"
         type="number"
         v-model="token1Amount"
+        :disabled="isChangingLiquidity"
       >
       </v-text-field>
 
@@ -115,7 +117,11 @@ export default {
   },
   computed: {
     isPoolingDisabled() {
-      return this.isChangingLiquidity || !this.currentSelectedPair
+      return (
+        this.isChangingLiquidity ||
+        !this.currentSelectedPair ||
+        (!this.token1Amount && !this.token0Amount)
+      )
     }
   },
   mounted() {

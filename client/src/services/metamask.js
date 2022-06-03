@@ -1,7 +1,10 @@
 const ethereum = window.ethereum
 import { ethers } from 'ethers'
 let signer
-let provider = new ethers.providers.Web3Provider(ethereum)
+let provider
+if (ethereum) {
+  provider = new ethers.providers.Web3Provider(ethereum)
+}
 
 export const isMetamaskInstalled = () => {
   return typeof ethereum !== 'undefined'

@@ -63,15 +63,16 @@ export const loadPairs = async () => {
   pairs = await Promise.all(pairAddresses.map(_getPairDetails))
 }
 
+const RATE_AFTER_FEES = 0.97
 export const getPairPrices = async pairAddress => {
   const pairContract = getPairContract(pairAddress)
   const prices = []
   const [reserve0, reserve1] = await pairContract.getReserves()
   if (reserve0) {
-    prices[0] = reserve1 / reserve0
+    prices[0] = (reserve1 / reserve0) * RATE_AFTER_FEES
   }
   if (reserve1) {
-    prices[1] = reserve0 / reserve1
+    prices[1] = (reserve0 / reserve1) * RATE_AFTER_FEES
   }
   return prices
 }
@@ -87,7 +88,7 @@ export const getPairDetailsByAddress = addressToFind => {
 }
 
 const _allowTransfer = (tokenContract, amount) => {
-  return tokenContract.increaseAllowance(ROUTER_ADDRESS, amount *2)
+  return tokenContract.increaseAllowance(ROUTER_ADDRESS, amount * 2)
 }
 
 export const addLiquidity = async (
