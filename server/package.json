@@ -1,0 +1,31 @@
+{
+  "name": "many-swap-public-api",
+  "version": "1.0.0",
+  "description": "Public API for ManySwap",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon --inspect app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "nodemon": "^2.0.16",
+    "winston": "^3.2.1",
+    "winston-console-format": "^1.0.5"
+  },
+  "devDependencies": {
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^8.0.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-promise": "^4.3.1",
+    "eslint-plugin-sort-requires": "^2.1.0",
+    "eslint-plugin-standard": "^5.0.0",
+    "prettier": "^2.2.1"
+  }
+}
