@@ -6,6 +6,8 @@ You can have a look in each folder for a more precise look on each service.
 
 Because of time constraints I couldn't finish all the functionalities that I wanted or polish perfectly the existing ones. However, I tried to list all the possible improvements in the readme file of each service.
 
+![swap screenshot](client/screenshots/swap.png)
+![pool screenshot](client/screenshots/pool.png)
 
 ## Features
 
