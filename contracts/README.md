@@ -1,16 +1,29 @@
 # Many swap smart contract
 
+## Commands
+
+Install
+```yarn```
+
+Run dev network
+```truffle develop```
+then
+```migrate```
+
+Install
+```yarn```
+
 ## Technical approach
 
 The pool is based on two main smart contracts:
 - ManySwapPair: It is the owner of all the tokens in the pool. It also acts as an ERC20 token to store the ownership of liquidity.
-- Router: It is used by the user to interact witht the pair. Its main 
+- Router: It is used by the user to interact witht the pair. Its first purposes is so create and store pairs. Its second purpose is to create the correct transfers of ERC20 tokens before the pair main functions are called (mint, burn, swap).
 
 ## Differences with UniSwap
 
-The overall approach and the basis for some function directly come from Uniswap. However there are lots of differences:
+The overall approach and the foundation for some functions directly come from Uniswap. However there are lots of differences:
 - Only core functionalities are left: this allows to have a simpler code to understand the basic concepts behind liquidity pools.
-- Using solidity 0.8: Better for security purposes. I don't understand fully yet all the implications on my code of overflows being impossible now, however this allowed to remove some pieces of logic dedicated to that. 
+- Using solidity 0.8: Better for security purposes. I don't yet fully understand all the implications of overflows being impossible on my code, however this allowed to remove some pieces of logic dedicated to that. 
 - Using Open Zepplin: This provides some big pieces of logic upon which we are able to lay the foundations of our contract. The code is audited and maintain regularly, this would improve future scalability and security.
 - Tests: My tests coverage is greatly reduced compared to Uniswap's test coverage. However I find my tests clearer to understand, better organized and more scalable.   
 
